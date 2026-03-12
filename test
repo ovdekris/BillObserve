@@ -1,0 +1,42 @@
+budget-app-backend/
+│
+├── src/
+│   ├── config/
+│   │   ├── db.js
+│   │   └── env.js
+│   │
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── transactionController.js
+│   │   └── budgetController.js
+│   │
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Transaction.js
+│   │   └── Budget.js
+│   │
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── transactionRoutes.js
+│   │   └── budgetRoutes.js
+│   │
+│   ├── services/
+│   │   ├── transactionService.js
+│   │   └── budgetService.js
+│   │
+│   ├── middleware/
+│   │   ├── authMiddleware.js
+│   │   └── errorMiddleware.js
+│   │
+│   ├── utils/
+│   │   ├── logger.js
+│   │   └── helpers.js
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── tests/
+│
+├── .env
+├── package.json
+└── README.md
