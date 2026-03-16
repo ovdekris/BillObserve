@@ -2,8 +2,8 @@ const rateLimit = require('express-rate-limit');
 
 // Ogólny limiter dla API
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minut
-    max: 100, // max 100 zapytań na IP
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: {
         success: false,
         message: 'Zbyt wiele zapytań, spróbuj ponownie za 15 minut'
@@ -12,11 +12,10 @@ const apiLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// Restrykcyjny limiter dla logowania/rejestracji
-/ Limiter dla rejestracji
+// Limiter dla rejestracji
 const registerLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 godzina
-    max: 10, // max 10 prób rejestracji na godzinę
+    windowMs: 60 * 60 * 1000,
+    max: 10,
     message: {
         success: false,
         message: 'Zbyt wiele prób rejestracji. Spróbuj ponownie za godzinę.'
@@ -27,9 +26,9 @@ const registerLimiter = rateLimit({
 
 // Limiter dla logowania
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minut
-    max: 10, // max 10 nieudanych prób logowania
-    skipSuccessfulRequests: true, // tylko nieudane próby liczą się do limitu
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    skipSuccessfulRequests: true,
     message: {
         success: false,
         message: 'Zbyt wiele prób logowania. Spróbuj ponownie za 15 minut.'
