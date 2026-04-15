@@ -25,63 +25,13 @@ exports.filterBody = (body, allowedFields) => {
     return filtered;
 };
 
-// Walidacja hex color
-exports.isValidHexColor = (color) => {
-    return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
-};
-
-// Walidacja liczby
-exports.isValidNumber = (value) => {
-    return !isNaN(Number(value));
-};
-
-// Walidacja danych portfela
-exports.validateWallet = (data) => {
-    const errors = [];
-
-    if (data.name !== undefined) {
-        if (typeof data.name !== 'string' || data.name.trim().length === 0) {
-            errors.push('Nazwa portfela jest wymagana');
-        } else if (data.name.length > 100) {
-            errors.push('Nazwa portfela nie może przekraczać 100 znaków');
-        }
-    }
-
-    if (data.type !== undefined && !exports.WALLET_TYPES.includes(data.type)) {
-        errors.push(`Nieprawidłowy typ portfela. Dozwolone: ${exports.WALLET_TYPES.join(', ')}`);
-    }
-
-    if (data.currency !== undefined && !exports.CURRENCIES.includes(data.currency)) {
-        errors.push(`Nieprawidłowa waluta. Dozwolone: ${exports.CURRENCIES.join(', ')}`);
-    }
-
-    if (data.balance !== undefined && !exports.isValidNumber(data.balance)) {
-        errors.push('Saldo musi być liczbą');
-    }
-
-    if (data.color !== undefined && !exports.isValidHexColor(data.color)) {
-        errors.push('Nieprawidłowy format koloru (wymagany hex, np. #4CAF50)');
-    }
-
-    if (data.includeInTotal !== undefined && typeof data.includeInTotal !== 'boolean') {
-        errors.push('includeInTotal musi być wartością boolean');
-    }
-
-    if (data.description !== undefined && typeof data.description !== 'string') {
-        errors.push('Opis musi być tekstem');
-    }
-
-    return errors;
-};
-
-// Sanityzacja danych portfela
-exports.sanitizeWallet = (data) => {
+// Sanityzacja pól tekstowych w obiekcie
+exports.sanitizeFields = (data, fieldLimits) => {
     const sanitized = { ...data };
-
-    if (sanitized.name) sanitized.name = exports.sanitizeString(sanitized.name, 100);
-    if (sanitized.description) sanitized.description = exports.sanitizeString(sanitized.description, 500);
-    if (sanitized.icon) sanitized.icon = exports.sanitizeString(sanitized.icon, 50);
-    if (sanitized.balance !== undefined) sanitized.balance = Number(sanitized.balance);
-
+    Object.entries(fieldLimits).forEach(([field, maxLength]) => {
+        if (sanitized[field]) {
+            sanitized[field] = exports.sanitizeString(sanitized[field], maxLength);
+        }
+    });
     return sanitized;
 };

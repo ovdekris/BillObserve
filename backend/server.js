@@ -1,35 +1,24 @@
 require('dotenv').config({ path: './config/.env' });
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const mongoSanitize = require('express-mongo-sanitize');
+const app = require('./app');
 const connectDB = require('./config/db');
-const { apiLimiter } = require('./middleware/rateLimiter');
 
-const app = express();
-
+// Połącz z bazą danych
 connectDB();
-
-// Bezpieczeństwo nagłówków HTTP
-app.use(helmet());
-
-// CORS - dostęp z frontendu
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true
-}))
-
-// Parsowanie JSON
-app.use(express.json());
-
-// Ochrona przed NoSQL injection
-app.use(mongoSanitize());
-
-// Rate limiting dla API
-app.use('/api', apiLimiter);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, ()=>{
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`);
+});
+
+// Obsługa nieobsłużonych odrzuceń promise
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err.message);
+    server.close(() => process.exit(1));
+});
+
+// Obsługa SIGTERM
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => process.exit(0));
 });

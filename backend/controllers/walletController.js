@@ -1,15 +1,10 @@
 const Wallet = require('../models/Wallet');
 const asyncHandler = require('../middleware/asyncHandler');
 const mongoose = require('mongoose');
-const {
-    isValidObjectId,
-    filterBody,
-    validateWallet,
-    sanitizeWallet,
-    WALLET_TYPES
-} = require('../utils/validators');
+const { isValidObjectId, filterBody, sanitizeFields, WALLET_TYPES } = require('../utils/validators');
 
 const ALLOWED_FIELDS = ['name', 'type', 'balance', 'currency', 'color', 'icon', 'includeInTotal', 'description'];
+const TEXT_LIMITS = { name: 100, description: 500, icon: 50 };
 
 // @route   GET /api/wallets
 exports.getWallets = asyncHandler(async (req, res) => {
@@ -28,10 +23,7 @@ exports.getWallets = asyncHandler(async (req, res) => {
 // @route   GET /api/wallets/:id
 exports.getWallet = asyncHandler(async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Nieprawidłowy identyfikator portfela'
-        });
+        return res.status(400).json({ success: false, message: 'Nieprawidłowy identyfikator' });
     }
 
     const wallet = await Wallet.findOne({
@@ -41,53 +33,26 @@ exports.getWallet = asyncHandler(async (req, res) => {
     });
 
     if (!wallet) {
-        return res.status(404).json({
-            success: false,
-            message: 'Portfel nie znaleziony'
-        });
+        return res.status(404).json({ success: false, message: 'Portfel nie znaleziony' });
     }
 
-    res.status(200).json({
-        success: true,
-        data: wallet
-    });
+    res.status(200).json({ success: true, data: wallet });
 });
 
 // @route   POST /api/wallets
 exports.createWallet = asyncHandler(async (req, res) => {
-    const filteredData = filterBody(req.body, ALLOWED_FIELDS);
-    const errors = validateWallet(filteredData);
+    const data = sanitizeFields(filterBody(req.body, ALLOWED_FIELDS), TEXT_LIMITS);
+    data.user = req.user.id;
 
-    if (!filteredData.name) {
-        errors.push('Nazwa portfela jest wymagana');
-    }
+    const wallet = await Wallet.create(data);
 
-    if (errors.length > 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Błąd walidacji',
-            errors
-        });
-    }
-
-    const sanitizedData = sanitizeWallet(filteredData);
-    sanitizedData.user = req.user.id;
-
-    const wallet = await Wallet.create(sanitizedData);
-
-    res.status(201).json({
-        success: true,
-        data: wallet
-    });
+    res.status(201).json({ success: true, data: wallet });
 });
 
 // @route   PUT /api/wallets/:id
 exports.updateWallet = asyncHandler(async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Nieprawidłowy identyfikator portfela'
-        });
+        return res.status(400).json({ success: false, message: 'Nieprawidłowy identyfikator' });
     }
 
     const wallet = await Wallet.findOne({
@@ -97,44 +62,23 @@ exports.updateWallet = asyncHandler(async (req, res) => {
     });
 
     if (!wallet) {
-        return res.status(404).json({
-            success: false,
-            message: 'Portfel nie znaleziony'
-        });
+        return res.status(404).json({ success: false, message: 'Portfel nie znaleziony' });
     }
 
-    const filteredData = filterBody(req.body, ALLOWED_FIELDS);
-    const errors = validateWallet(filteredData);
+    const data = sanitizeFields(filterBody(req.body, ALLOWED_FIELDS), TEXT_LIMITS);
 
-    if (errors.length > 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Błąd walidacji',
-            errors
-        });
-    }
-
-    const sanitizedData = sanitizeWallet(filteredData);
-
-    const updatedWallet = await Wallet.findByIdAndUpdate(
-        req.params.id,
-        sanitizedData,
-        { new: true, runValidators: true }
-    );
-
-    res.status(200).json({
-        success: true,
-        data: updatedWallet
+    const updatedWallet = await Wallet.findByIdAndUpdate(req.params.id, data, {
+        new: true,
+        runValidators: true
     });
+
+    res.status(200).json({ success: true, data: updatedWallet });
 });
 
 // @route   DELETE /api/wallets/:id
 exports.deleteWallet = asyncHandler(async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Nieprawidłowy identyfikator portfela'
-        });
+        return res.status(400).json({ success: false, message: 'Nieprawidłowy identyfikator' });
     }
 
     const wallet = await Wallet.findOne({
@@ -144,19 +88,13 @@ exports.deleteWallet = asyncHandler(async (req, res) => {
     });
 
     if (!wallet) {
-        return res.status(404).json({
-            success: false,
-            message: 'Portfel nie znaleziony'
-        });
+        return res.status(404).json({ success: false, message: 'Portfel nie znaleziony' });
     }
 
     wallet.isArchived = true;
     await wallet.save();
 
-    res.status(200).json({
-        success: true,
-        message: 'Portfel został zarchiwizowany'
-    });
+    res.status(200).json({ success: true, message: 'Portfel zarchiwizowany' });
 });
 
 // @route   GET /api/wallets/total-balance
@@ -177,43 +115,24 @@ exports.getTotalBalance = asyncHandler(async (req, res) => {
         }
     ]);
 
-    res.status(200).json({
-        success: true,
-        data: result
-    });
+    res.status(200).json({ success: true, data: result });
 });
 
 // @route   PATCH /api/wallets/:id/balance
 exports.updateBalance = asyncHandler(async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Nieprawidłowy identyfikator portfela'
-        });
+        return res.status(400).json({ success: false, message: 'Nieprawidłowy identyfikator' });
     }
 
     const { amount, operation } = req.body;
 
     if (!['add', 'subtract', 'set'].includes(operation)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Nieprawidłowa operacja. Dozwolone: add, subtract, set'
-        });
+        return res.status(400).json({ success: false, message: 'Operacja: add, subtract lub set' });
     }
 
     const numAmount = Number(amount);
     if (isNaN(numAmount)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Kwota musi być liczbą'
-        });
-    }
-
-    if (operation !== 'set' && numAmount < 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Kwota nie może być ujemna dla operacji add/subtract'
-        });
+        return res.status(400).json({ success: false, message: 'Kwota musi być liczbą' });
     }
 
     const wallet = await Wallet.findOne({
@@ -223,30 +142,16 @@ exports.updateBalance = asyncHandler(async (req, res) => {
     });
 
     if (!wallet) {
-        return res.status(404).json({
-            success: false,
-            message: 'Portfel nie znaleziony'
-        });
+        return res.status(404).json({ success: false, message: 'Portfel nie znaleziony' });
     }
 
-    switch (operation) {
-        case 'add':
-            wallet.balance += numAmount;
-            break;
-        case 'subtract':
-            wallet.balance -= numAmount;
-            break;
-        case 'set':
-            wallet.balance = numAmount;
-            break;
-    }
+    if (operation === 'add') wallet.balance += numAmount;
+    else if (operation === 'subtract') wallet.balance -= numAmount;
+    else wallet.balance = numAmount;
 
     await wallet.save();
 
-    res.status(200).json({
-        success: true,
-        data: wallet
-    });
+    res.status(200).json({ success: true, data: wallet });
 });
 
 // @route   GET /api/wallets/type/:type
@@ -254,10 +159,7 @@ exports.getWalletsByType = asyncHandler(async (req, res) => {
     const { type } = req.params;
 
     if (!WALLET_TYPES.includes(type)) {
-        return res.status(400).json({
-            success: false,
-            message: `Nieprawidłowy typ portfela. Dozwolone: ${WALLET_TYPES.join(', ')}`
-        });
+        return res.status(400).json({ success: false, message: `Typ: ${WALLET_TYPES.join(', ')}` });
     }
 
     const wallets = await Wallet.find({
@@ -266,9 +168,5 @@ exports.getWalletsByType = asyncHandler(async (req, res) => {
         isArchived: false
     }).sort({ createdAt: -1 });
 
-    res.status(200).json({
-        success: true,
-        count: wallets.length,
-        data: wallets
-    });
+    res.status(200).json({ success: true, count: wallets.length, data: wallets });
 });
