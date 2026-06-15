@@ -217,7 +217,7 @@ exports.getStats = asyncHandler(async (req, res) => {
         {
             $group: {
                 _id: '$type',
-                total: { $sum: '$amount' },
+                total: { $sum: 'getByCategory$amount' },
                 count: { $sum: 1 }
             }
         }

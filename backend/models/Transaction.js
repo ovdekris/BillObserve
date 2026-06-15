@@ -14,7 +14,7 @@ const transactionSchema = new mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: [true, 'Kategoria jest wymagana']
+    required: [function() { return this.type !== 'transfer'; }, 'Kategoria jest wymagana']
   },
   type: {
     type: String,

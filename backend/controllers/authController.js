@@ -1,7 +1,9 @@
+const crypto = require('crypto');
 const User = require('../models/User');
 const asyncHandler = require('../middleware/asyncHandler');
 const jwt = require('jsonwebtoken');
 const { filterBody, sanitizeFields } = require('../utils/validators');
+const { sendPasswordResetEmail } = require('../services/emailService');
 
 const ALLOWED_REGISTER_FIELDS = ['email', 'password', 'name', 'currency'];
 const ALLOWED_UPDATE_FIELDS = ['name', 'currency', 'settings'];
@@ -34,6 +36,19 @@ const sendTokenResponse = (user, statusCode, res, message) => {
 // @desc    Rejestracja nowego użytkownika
 exports.register = asyncHandler(async (req, res) => {
     const data = sanitizeFields(filterBody(req.body, ALLOWED_REGISTER_FIELDS), TEXT_LIMITS);
+
+    // Walidacja hasła
+    const password = data.password || '';
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    if (!hasUpperCase || !hasLowerCase || !hasSpecialChar) {
+        return res.status(400).json({
+            success: false,
+            message: 'Hasło musi zawierać co najmniej jedną wielką literę, jedną małą literę i jeden znak specjalny'
+        });
+    }
 
     // Sprawdź czy email jest już zajęty
     const existingUser = await User.findOne({ email: data.email?.toLowerCase() });
@@ -131,6 +146,17 @@ exports.changePassword = asyncHandler(async (req, res) => {
         });
     }
 
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasSpecialChar) {
+        return res.status(400).json({
+            success: false,
+            message: 'Hasło musi zawierać co najmniej jedną wielką literę, jedną małą literę i jeden znak specjalny'
+        });
+    }
+
     // Pobierz użytkownika z hasłem
     const user = await User.findById(req.user.id).select('+password');
 
@@ -210,4 +236,75 @@ exports.updateSettings = asyncHandler(async (req, res) => {
         message: 'Ustawienia zostały zaktualizowane',
         data: user
     });
+});
+
+// @route   POST /api/auth/forgot-password
+// @desc    Wyślij email z linkiem do resetowania hasła
+exports.forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email: email?.toLowerCase() });
+
+    // Zawsze zwracamy 200, żeby nie ujawniać czy email istnieje
+    if (!user) {
+        return res.status(200).json({
+            success: true,
+            message: 'Jeśli konto istnieje, link został wysłany na podany adres email'
+        });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 godzina
+    await user.save({ validateBeforeSave: false });
+
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${rawToken}`;
+
+    try {
+        await sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
+    } catch {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        return res.status(500).json({
+            success: false,
+            message: 'Nie udało się wysłać emaila. Spróbuj ponownie później.'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Jeśli konto istnieje, link został wysłany na podany adres email'
+    });
+});
+
+// @route   POST /api/auth/reset-password/:token
+// @desc    Ustaw nowe hasło za pomocą tokena
+exports.resetPassword = asyncHandler(async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    }).select('+resetPasswordToken +resetPasswordExpire');
+
+    if (!user) {
+        return res.status(400).json({
+            success: false,
+            message: 'Token jest nieprawidłowy lub wygasł'
+        });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    sendTokenResponse(user, 200, res, 'Hasło zostało zmienione');
 });

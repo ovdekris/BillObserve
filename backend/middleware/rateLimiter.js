@@ -37,4 +37,16 @@ const loginLimiter = rateLimit({
     legacyHeaders: false
 });
 
-module.exports = { apiLimiter, registerLimiter, loginLimiter };
+// Limiter dla forgot-password
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: {
+        success: false,
+        message: 'Zbyt wiele prób resetowania hasła. Spróbuj ponownie za godzinę.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+module.exports = { apiLimiter, registerLimiter, loginLimiter, forgotPasswordLimiter };

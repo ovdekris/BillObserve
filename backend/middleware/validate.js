@@ -19,8 +19,7 @@ const validate = (req, res, next) => {
 // Walidacja rejestracji
 const registerRules = [
     body('email')
-        .isEmail().withMessage('Nieprawidłowy format email')
-        .normalizeEmail(),
+        .isEmail().withMessage('Nieprawidłowy format email'),
     body('password')
         .isLength({ min: 8 })
         .withMessage('Hasło musi mieć co najmniej 8 znaków')
@@ -40,8 +39,7 @@ const registerRules = [
 // Walidacja logowania
 const loginRules = [
     body('email')
-        .isEmail().withMessage('Nieprawidłowy format email')
-        .normalizeEmail(),
+        .isEmail().withMessage('Nieprawidłowy format email'),
     body('password')
         .notEmpty().withMessage('Hasło jest wymagane')
 ];
@@ -113,6 +111,22 @@ const mongoIdParam = (paramName = 'id') => [
     param(paramName).isMongoId().withMessage('Nieprawidłowy ID')
 ];
 
+// Walidacja forgot-password
+const forgotPasswordRules = [
+    body('email')
+        .isEmail().withMessage('Nieprawidłowy format email')
+];
+
+// Walidacja reset-password
+const resetPasswordRules = [
+    body('password')
+        .isLength({ min: 8 }).withMessage('Hasło musi mieć co najmniej 8 znaków')
+        .matches(/[A-Z]/).withMessage('Hasło musi zawierać wielką literę')
+        .matches(/[a-z]/).withMessage('Hasło musi zawierać małą literę')
+        .matches(/[0-9]/).withMessage('Hasło musi zawierać cyfrę')
+        .matches(/[!@#$%^&*]/).withMessage('Hasło musi zawierać znak specjalny')
+];
+
 module.exports = {
     validate,
     registerRules,
@@ -121,5 +135,7 @@ module.exports = {
     budgetRules,
     categoryRules,
     walletRules,
-    mongoIdParam
+    mongoIdParam,
+    forgotPasswordRules,
+    resetPasswordRules
 };

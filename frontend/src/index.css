@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+  /* Colors - Primary */
+  --color-primary: #7c5bf5;
+  --color-accent: #f0edff;
+  --color-dark: #1a1135;
+
+  /* Colors - Background */
+  --color-bg: #f5f4f9;
+  --color-bg-grey: #F2F2F2;
+
+  /* Colors - Text */
+  --color-text: #2d2d2d;
+  --color-text-dark: #000;
+  --color-text-inverse: #ffffff;
+
+  /* Colors - Status */
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Colors - Border */
+  --color-border: #e5e7eb;
+  --color-border-dark: #374151;
+  --color-border-gray: #f2f2f2;
+
+  /* Typography */
+  --font-main: 'Poppins', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --line-height-normal: 1.35;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Border Radius */
+  --radius: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition: 300ms ease;
+
+  /* Z-Index */
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-tooltip: 300;
+  --z-toast: 400;
+
+  /* Container */
+  --container-sm: 460px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+
+  /*Box shadow*/
+  --box-shadow: rgba(16, 24, 40, 0.06) 0px 2px 16px -2px, rgba(16, 24, 40, 0.1) 0px 4px 8px -2px;
+}
+
+@keyframes float-a {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  30%      { transform: translate(18px, -22px) scale(1.08); }
+  65%      { transform: translate(-12px, 14px) scale(0.94); }
+}
+
+@keyframes float-b {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(-20px, 16px) scale(1.1); }
+  60%      { transform: translate(14px, -18px) scale(0.92); }
+}
+
+@keyframes float-c {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  40%      { transform: translate(16px, 20px) scale(1.06); }
+  75%      { transform: translate(-18px, -12px) scale(0.96); }
+}
+
+@keyframes float-d {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  20%      { transform: translate(-14px, -18px) scale(1.12); }
+  55%      { transform: translate(20px, 12px) scale(0.9); }
+}
+
+.dot-a { animation: float-a 7s ease-in-out infinite; }
+.dot-b { animation: float-b 9s ease-in-out infinite; }
+.dot-c { animation: float-c 8s ease-in-out infinite 1s; }
+.dot-d { animation: float-d 10s ease-in-out infinite 0.5s; }

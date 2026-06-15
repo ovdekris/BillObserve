@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie · Budget Manager</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <main class="auth-wrapper">
+        <section class="auth-card">
+            <header class="auth-header">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </div>
+                <h1>Witaj z powrotem</h1>
+                <p class="subtitle">Zaloguj się, aby zarządzać swoim budżetem</p>
+            </header>
+
+            <form id="login-form" class="auth-form" novalidate>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        autocomplete="email"
+                        placeholder="twoj@email.com"
+                        required
+                    >
+                    <span class="field-error" data-error-for="email"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="password">Hasło</label>
+                        <a href="/forgot-password.html" class="forgot-link">Zapomniałeś hasła?</a>
+                    </div>
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                            minlength="6"
+                            required
+                        >
+                        <button type="button" class="toggle-password" id="toggle-password" aria-label="Pokaż hasło">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="field-error" data-error-for="password"></span>
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="remember" name="remember">
+                    <span>Zapamiętaj mnie</span>
+                </label>
+
+                <div class="form-alert" id="form-alert" role="alert" hidden></div>
+
+                <button type="submit" class="btn-primary" id="submit-btn">
+                    <span class="btn-label">Zaloguj się</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
+            </form>
+
+            <footer class="auth-footer">
+                <p>Nie masz konta? <a href="/register.html">Zarejestruj się</a></p>
+            </footer>
+        </section>
+    </main>
+
+    <script src="/js/login.js" defer></script>
+</body>
+</html>

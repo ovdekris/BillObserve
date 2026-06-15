@@ -7,15 +7,19 @@ const {
     updateMe,
     changePassword,
     deleteAccount,
-    updateSettings
+    updateSettings,
+    forgotPassword,
+    resetPassword
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
-const { registerRules, loginRules, validate } = require('../middleware/validate');
-const { registerLimiter, loginLimiter } = require('../middleware/rateLimiter');
+const { registerRules, loginRules, forgotPasswordRules, resetPasswordRules, validate } = require('../middleware/validate');
+const { registerLimiter, loginLimiter, forgotPasswordLimiter } = require('../middleware/rateLimiter');
 
 // Publiczne endpointy
 router.post('/register', registerLimiter, registerRules, validate, register);
 router.post('/login', loginLimiter, loginRules, validate, login);
+router.post('/forgot-password', forgotPasswordLimiter, forgotPasswordRules, validate, forgotPassword);
+router.post('/reset-password/:token', resetPasswordRules, validate, resetPassword);
 
 // Chronione endpointy (wymagają autoryzacji)
 router.get('/me', protect, getMe);
